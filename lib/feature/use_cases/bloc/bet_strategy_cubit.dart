@@ -16,6 +16,7 @@ class BetStratCubit extends Cubit<BetStratState> {
     }
 
     final allBSList = repository.getAllBS();
+    getBSfromDB();
     if (allBSList.isNotEmpty) {
       final sortedBS = _sortBS(allBSList);
       emit(BetStratLoadSuccessfulState(
@@ -37,10 +38,9 @@ class BetStratCubit extends Cubit<BetStratState> {
     }
 
     try {
-      final favBSList = await repository.getFavoriteBS();
+      final favBSList = await getBSfromDB();
       if (favBSList.isNotEmpty) {
         final sortedBS = _sortBS(favBSList);
-
         emit(BetStratLoadSuccessfulState(
             listBetStrats: sortedBS,
             title: 'Your strategies',
@@ -64,7 +64,6 @@ class BetStratCubit extends Cubit<BetStratState> {
         loadAllBS();
       } else {
         addToFavorite(betStrat);
-
         loadAllBS();
       }
     } else {
@@ -100,6 +99,15 @@ class BetStratCubit extends Cubit<BetStratState> {
 
   changeListStatus() {
     isFav = !isFav;
+  }
+
+  Future<List<BetStrat>> getBSfromDB() async {
+    final favBSList = await repository.getFavoriteBS();
+    addedBS = [];
+    for (var item in favBSList) {
+      addedBS.add(item.id);
+    }
+    return favBSList;
   }
 }
 
